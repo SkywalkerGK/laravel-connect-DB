@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -18,10 +19,14 @@ class DepartmentController extends Controller
         //Query builder
         //$departments = DB::table('departments')->get();
         //$departments = DB::table('departments')->paginate(2); //แบ่ง กำหนดหมายเลขหน้า
+        /*
         $departments = DB::table('departments')
         ->join('users','departments.user_id','users.id')
         ->select('departments.*','users.name')->paginate(2);
-        return view('admin.department.index',compact('departments'));
+        */
+        $departments=Department::paginate(2);
+        $trashDepartments = Department::onlyTrashed()->paginate(2);
+        return view('admin.department.index',compact('departments','trashDepartments'));
     }
 
     public function store(Request $request){
@@ -82,5 +87,19 @@ class DepartmentController extends Controller
             ]);
             return redirect()->route('department')->with('success','อัพเดตข้อมูลเรียบร้อย');
 
+    }
+
+    public function softdelete($id){
+        $delete = Department::find($id)->delete();
+        return redirect()->back()->with('success','ลบข้อมูลเรียบร้อย');
+    }
+
+    public function restore($id){
+        $restore = Department::withTrashed()->find($id)->restore();
+        return redirect()->back()->with('success','กู้คืนข้อมูลเรียบร้อย');
+    }
+    public function delete($id){
+        $delete = Department::onlyTrashed()->find($id)->forceDelete();
+        return redirect()->back()->with('success','ลบข้อมูลถาวรเรียบร้อย');
     }
 }
