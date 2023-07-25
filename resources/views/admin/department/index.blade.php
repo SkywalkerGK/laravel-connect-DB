@@ -21,17 +21,17 @@
                                         <tr>
                                         <th scope="col">ลำดับ</th>
                                         <th scope="col">ชื่อแผนก</th>
-                                        <th scope="col">UserID</th>
+                                        <th scope="col">พนักงาน</th>
                                         <th scope="col">วันที่เพิ่มข้อมูล</th>
+                                        <th scope="col">Edit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php($i=1)
                                         @foreach($departments as $row)
                                         <tr>
-                                        <th>{{$i++}}</th>
+                                        <th>{{$row->id}}</th>
                                         <td>{{$row->department_name}}</td>
-                                        <td>{{$row->user_id}}</td>
+                                        <td>{{$row->name}}</td>
                                         <td>
                                         @if($row->created_at == NULL)
                                         ไม่มีเธอ หรือเธอไม่มี
@@ -39,10 +39,14 @@
                                         {{Carbon\Carbon::parse($row->created_at)->diffForHumans()}}
                                         @endif
                                         </td>
+                                        <td>
+                                            <a href="{{url('/department/edit/'.$row->id)}}" class="btn btn-primary">แก้ไข</a>
+                                        </td>
                                         </tr>
                                         @endforeach
                                     </tbody>
                             </table>
+                            {{$departments->links()}}
                     </div>
                 </div>
                 <div class="col-md-4">

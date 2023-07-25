@@ -13,9 +13,14 @@ class DepartmentController extends Controller
     public function index(){
         //Eloquent ORM
         //$departments = Department::all(); //ดึงข้อมูลมาทั้งหมด
+        //$departments = Department::paginate(2); //แบ่ง กำหนดหมายเลขหน้า
 
         //Query builder
-        $departments = DB::table('departments')->get();
+        //$departments = DB::table('departments')->get();
+        //$departments = DB::table('departments')->paginate(2); //แบ่ง กำหนดหมายเลขหน้า
+        $departments = DB::table('departments')
+        ->join('users','departments.user_id','users.id')
+        ->select('departments.*','users.name')->paginate(2);
         return view('admin.department.index',compact('departments'));
     }
 
@@ -49,5 +54,33 @@ class DepartmentController extends Controller
 
     DB::table('departments')->insert($data);
     return redirect()->back()->with('success','บันทึกข้อมูลเรียบร้อย');
+    }
+
+    public function edit($id){
+        //dd($id);
+        $department = Department::find($id);
+        return view('admin.department.edit',compact('department'));
+
+    }
+
+    public function update(Request $request,$id){
+                //ตรวจสอบข้อมูล
+                $request->validate([
+                    'department_name'=>'required|unique:departments|max:255'
+                ],
+        
+                [
+                    'department_name.required' => 'กรุณาป้อนชิ่อแผนกด้วยครับ',
+                    'department_name.max' => 'จำนวนอักขระเกินที่กำหนด',
+                    'department_name.unique' => 'มีชื่อแผนกนี้ในฐานข้อมูลแล้ว'
+                ]
+            );
+
+            $update = Department::find($id)->update([
+                'department_name'=>$request->department_name,
+                'user_id'=>Auth::user()->id
+            ]);
+            return redirect()->route('department')->with('success','อัพเดตข้อมูลเรียบร้อย');
+
     }
 }
